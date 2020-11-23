@@ -1,247 +1,246 @@
 'use strict';
-
-//Global Variables
-const questionNum = 0;
-
-const score = 0;
-
-const userAnswer = "";
-//adds question HTML to the .quiz-page section
-function renderQuestion(){
-    const question = getQuestion(questionNum);
-    $('.quiz-page').html(question);
-}
-//Returns the HTML to be added to the question page
-function getQuestion(quizNum){
-    return ` <div class="top-section" role="question-info">
-                <div class="question-num">
-                    Question ${quizNum+1}/5
-                </div>
-                <div class="quiz-score">
-                    Score ${score}
-                </div>
-            </div>
-
-            <div class="question">
-                ${QUIZDATA[quizNum].question}
-            </div>
-            <form action="" class="quiz-question">
-                <fieldset>
-                    <label for="option-a" class="options-list-item" id="a">
-                    <input type="radio" name="answer-option" id="option-a" value="${QUIZDATA[quizNum].options[0]}" required>
-                    <span class="option-text">${QUIZDATA[quizNum].options[0]}</span>
-                    </label>
-                    <label for="option-b" class="options-list-item" id="b">
-                    <input type="radio" name="answer-option" id="option-b" value="${QUIZDATA[quizNum].options[1]}" required>
-                    <span class="option-text">${QUIZDATA[quizNum].options[1]}</span>
-                    </label>
-                    <label for="option-c" class="options-list-item" id="c">
-                    <input type="radio" name="answer-option" id="option-c" value="${QUIZDATA[quizNum].options[2]}" required>
-                    <span class="option-text">${QUIZDATA[quizNum].options[2]}</span>
-                    </label>
-                    <label for="option-d" class="options-list-item" id="d">
-                    <input type="radio" name="answer-option" id="option-d" value="${QUIZDATA[quizNum].options[3]}" required>
-                    <span class="option-text">${QUIZDATA[quizNum].options[3]}</span>
-                    </label>
-                    <button type="submit" class="submit-answer app-buttons">Submit Answer</button>
-                    <div class="no-selection-error">
-                    Error: Please make one selection to proceed to the next question
-                    </div>
-                </fieldset>
-            </form>`;
-
-}
-
-
-
-//This function handles the button click on Let's Start 
-
-function handleBeginning(){
-
-    $('.start-quiz-button').on("click", function(event){
-        
-        //stop page from submitting and refreshing automatically
-        event.preventDefault();
-        
-        //hide the current page and then call the renderQuestion to 
-        //make the page ready for the question to be asked
-        //and fadeIn the question. 
-        $('.intro-screen').fadeOut(200);
-        renderQuestion();
-        $('.quiz-page').delay(200).fadeIn(200);
-    });
-
-}
-
-//This function toggles the style for the selected input radio button.
-//changes the background of the label element so the user is aware
-//of what his/her selection is
-function handleUserAnswerSelection(){
+const STORE = {
+  questions: [
+    {
+      question: 'How old was Jimi Hendrix when he died?',
+      answers: [
+          '23',
+          '24',
+        '28',
+        '27'
+      ],
+      answer: '27'
+    },
+  
+    {
+      question: 'How old was Kurt Cobain when he died?',
+      answers: [
+          '21',
+          '30',
+          '27',
+          '24'
+      ],
+      answer: '27'
+    },
     
-    $('.quiz-page').on("click", "label", function(event){
-        if($(this).find('input[type="radio"]').is(':checked')){
-            $('.quiz-page label').removeClass('options-list-item-selected');
-            $(this).addClass('options-list-item-selected');
-
-            //Sets the the selected answer value as per the users selection
-            userAnswer = $(this).find('.option-text').text();
-        }
-    });
-}
-
-//returns HTML text to include on the answer page
-function getAnswerText(classTxt){
-    return `<h1 class="answer-heading ${classTxt}-answer">
-                ${classTxt}
-            </h1>
-            <div class="answer">
-                    ${QUIZDATA[questionNum].answertext}
-            </div>
-            <button class="next-question app-buttons">Continue</button>`;
-}
-
-//This function renders the page depending if the answer is 
-//correct or incorrect 
-function renderAnswerPage(correct){
-    let answerClassName = "⭐ correct";
-    if(correct){
-        $('.quiz-answer').removeClass("incorrect");
-        $('.quiz-answer').addClass(answerClassName);
-    }else{
-        answerClassName = "❌ incorrect";
-        $('.quiz-answer').removeClass("correct");
-        $('.quiz-answer').addClass(answerClassName);
+    {
+      question: 'How old was Janis Joplin when she died?',
+      answers: [
+          '25',
+          '27',
+          '26',
+           '24'
+      ],
+      answer: '27'
+    },
+    
+    {
+      question: 'How old was Amy Whinehouse when she died?',
+      answers: [
+      '31',
+      '30',
+      '27',
+      '24'
+      ],
+      answer: '27'
+    },
+    
+    {
+      question: 'How old was Jim Morrison when he died?',
+      answers: [
+          '31',
+          '30',
+          '27',
+          '24'
+      ],
+      answer: '27'
     }
-    const answerPageText = getAnswerText(answerClassName);
-
-    //this will add a correct / incorrect class to get the border for the correct color.
-    $('.quiz-answer').html(answerPageText);
-    
+  ],
+  quizStarted: false,
+  correctAnswer: 0,
+  score: 0
 }
-
-//This function handles the button click on Submit Answer 
-function handlesSubmitAnswer(){
-
-    $('.quiz-page').on("submit", "form",function(event){
-        
-        event.preventDefault();
-        let correct = true; 
-        $('.quiz-page').fadeOut(200);
-
-        //if the answer is correct increment score
-        if(userAnswer === QUIZDATA[questionNum].answer)
-        {
-            score++;
-        }else{
-            correct = false;
-        }
-
-        // render
-        renderAnswerPage(correct);
-        $('.quiz-answer').delay(200).fadeIn(200);
-
-    });
-
-}
-
-//Returns the User a Text based on thier performance with the quiz
-function resultBasedText(){
-    if(score === 0)
-        return `thats really your Answer?`;
-    
-    if(score >= 1 && score <= 2)
-        return `You can definitely do better <br>
-        Why not give it another try?`;
-
-    if(score >=2 && score <=3)
-    `Not bad but..<br>
-    Do better!!<br>
-    Try again?`;
-
-    if(score >= 3 && score <=4)
-        return `Almost... <br>
-        Try again?`;;
-    
-    if(score === 5)
-        return `You Win!!<br>
-        5 out of 5 Wow!. <br>
-        Try again?`;
-}
-
-//setting text for the result page with user score
-function getResultText(){
-    return `<h1 class="result-heading">You Scored</h1>
-                
+// Generates HTML for the start screen
+function generateStartScreen(){
+    return `<div class="start-screen">
+    <p>This quiz will test your Celebrity knowledge</p>
+    <button type="button" id="start">Start Quiz</button>
     </div>
-    <div class="overall-score">
-        
-        <div class="score-square">
-            <p class="score">${score}</p>
-            <p class="total-score">5</p>
+    `;
+}
+// Generates HTML for the section of the app that displays number/score
+function generateQuestionScoreNumber() {
+    return `
+    <ul class="questions-and-score">
+    <li id="question-number">
+    Question Number: ${STORE.correctAnswer + 1}/${STORE.questions.length}
+    </li>
+  </ul>
+  `;
+}
+
+// Generates the list of possible answers for one question
+function generateAnswers() {
+    const answerArray = STORE.questions[STORE.correctAnswer].answers
+    let answersHTML = '';
+    let i = 0;
+
+    answerArray.forEach(answer => {
+        answersHTML += `
+        <div id="option-container-${i}"
+        <input type="radio" name="options" id="option${i + 1}" value=
+        ${answers}" tabIndex="${i + 1}" required>
         </div>
-    </div>
-    <div class="retake-text">
-        ${resultBasedText()}
-    </div>
-    <button class="retake app-buttons">Retake Quiz</button>`;
-}
-// add html to result page
-
-function renderQuizResult(){
-    const resulText = getResultText();
-    $('.quiz-result').html(resulText);
-}
-
-
-//if quiz is completed will take the user to the result screen
-function handleNextQuestion(){
-
-    $('.quiz-answer').on("click", ".next-question", function(event){ 
-        questionNum++;
-        event.preventDefault();
-        $('.quiz-answer').fadeOut(200);
-        if(questionNum <= 4){
-            renderQuestion();
-            $('.quiz-page').delay(200).fadeIn(200);
-        }else{
-            renderQuizResult();
-            $('.quiz-result').delay(200).fadeIn(200);
-        } 
+        `;
+        i++;
     });
-
+    return answersHTML;
 }
-// Function handles click on retake quiz button on result page
-// User chooses to retake they will be taken back to intro(beginning)
 
-function handleRetakeQuiz(){
+// Generates the HTML to display one question
 
-    $('.quiz-result').on("click", ".retake", function(event){
+function generateQuestions() {
+    let correctAnswer = STORE.questions[STORE.correctAnswer];
+    return `
+    <form id="question-form" class="question-form">
+    <fieldset>
+    <div class="question">
+    <legend> ${correctAnswer.question}</legend>
+    </div>
+    <div class="options">
+    <div class="answers">
+    ${generateAnswers()}
+    </div>
+ </div>
+ <button type="submit: id="submit-answer-btn" tabindex="5">Submit</button>
+ <button type="button: id="next-question=btn" tabindex="6">Next &gt;></button>
+ </fieldset>
+ </form>
+    `;
+}
 
-        event.preventDefault();
-        $('.quiz-result').fadeOut(200);
+// Generate the Results HTML
+function generateResults() {
+    return `
+    <div class="results">
+    <form id="restart-quiz">
+    <fieldset>
+    <div class="row">
+    <div class="col-12">
+      <legend>Your Score is: ${STORE.score}/${STORE.questions.length}</legend>
+    </div>
+  </div>
 
-        // default global values
-        questionNum = 0;
-        score = 0;
-        userAnswer = "";
+  <div class="row">
+    <div class="col-12">
+      <button type="button" id="restart"> Restart Quiz </button>
+    </div>
+  </div>
+</fieldset>
+</form>
+</div>
+`;
+}
 
-        //back to intro screen
-        $('.intro-screen').delay(200).fadeIn(200);
 
+// generates if user was correct or incorrect
+function getResults(answerResult) {
+    let correctAnswer = STORE.questions[STORE.correctAnswer].answer;
+    let result = '';
+    if (answerStatus === 'correct') {
+        result = `
+        <div class="right-answer">That is correct!</div>
+        `;
+      }
+      else if (answerStatus === 'incorrect') {
+        result = `
+          <div class="wrong-answer">That is incorrect. The correct answer is ${correctAnswer}.</div>
+        `;
+      }
+      return result;
+    }
+
+// render function
+
+function render() {
+    let result = '';
+
+    if (STORE.quizStarted === false) {
+        $('main').html(generateStartScreen());
+        return;
+    }
+    else if (STORE.correctAnswer >= 0 && STORE.correctAnswer < STORE.questions.length) {
+        result = generateQuestionScoreNumber();
+        result += generateQuestions();
+        $('main').html(result);
+    }
+    else {
+        $('main').html(generateResults());
+    }
+}
+
+
+// event handler functions
+// handles click start button
+function handleStartQuiz() {
+    $('main').on('click', '#start', function(event) {
+        STORE.quizStarted = true;
+        render();
     });
 }
 
+// handles the next button
+function handleNextQuestion() {
+    $('body').on('click', '#next-question-btn', (event) => {
+        render();
+    });
+}
 
-//The handleApplication will all the funnctions for handling the user clicks
+// handles the submission of question 
+function handleQuestionSubmission() {
+    $('body').on('submit', '#question-form', function (event) {
+        event.preventDefault();
+        const correctAnswer = STORE.questions[STORE.correctAnswer];
+        let selectedOption = $('input[name=options]:checked').val();
+        let optionContainerId = `#option-container-${correctAnswer.answers.findIndex(i => i === selectedOption)}`;
+        if (selectedOption === STORE.correctAnswer) {
+            STORE.score++;
+            $(optionContainerId).append(generateFeedbackHTML('correct'));
+          }
+          else {
+            $(optionContainerId).append(generateFeedbackHTML('incorrect'));
+          }
+          STORE.correctAnswer++;
+          // hide the submit button
+          $('#submit-answer-btn').hide();
+          // disable all inputs
+          $('input[type=radio]').each(() => {
+            $('input[type=radio]').attr('disabled', true);
+          });
+          // show the next button
+          $('#next-question-btn').show();
+      
+        });
+    }
 
-function handleApplication(){
-
-    handleBeginning();
-    handleUserAnswerSelection();
-    handlesSubmitAnswer();
+// reset all values
+function restartQuiz() {
+    STORE.quizStarted = false;
+    STORE.currentQuestion = 0;
+    STORE.score = 0;
+  }
+  function handleRestartClick() {
+    $('body').on('click', '#restart', () => {
+      restartQuiz();
+      render();
+    });
+  }
+  function handleQuizApp() {
+    render();
+    handleStartQuiz();
     handleNextQuestion();
-    handleRetakeQuiz();
-        
-}
-
-$(handleApplication);
+    handleQuestionSubmission();
+    handleRestartClick();
+  }
+  
+  $(handleQuizApp);
